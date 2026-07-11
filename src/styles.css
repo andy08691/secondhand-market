@@ -8,7 +8,8 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; }
+html { background: #f6f4ee; }
+body { margin: 0; min-width: 320px; background: #f6f4ee; }
 button, input, select { font: inherit; }
 
 .hero {
@@ -28,7 +29,7 @@ button, input, select { font: inherit; }
   position: sticky; top: 0; z-index: 5;
   display: flex; gap: 16px; justify-content: space-between; align-items: center;
   padding: 18px max(24px, calc((100vw - 1120px) / 2));
-  background: rgba(246, 244, 238, .94); backdrop-filter: blur(14px);
+  background: #f6f4ee;
   border-bottom: 1px solid #dedbd2;
 }
 .search-box { display: flex; align-items: center; gap: 10px; flex: 1; max-width: 480px; padding: 10px 14px; background: white; border: 1px solid #d6d2c8; border-radius: 12px; }
@@ -38,11 +39,24 @@ select { padding: 10px 34px 10px 12px; border: 1px solid #d6d2c8; border-radius:
 
 .content { max-width: 1120px; margin: 0 auto; padding: 36px 24px 80px; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.card { overflow: hidden; background: white; border: 1px solid #e1ded6; border-radius: 18px; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+.card {
+  overflow: hidden;
+  background: white;
+  border: 1px solid #e1ded6;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  content-visibility: auto;
+  contain-intrinsic-size: 420px;
+  contain: layout paint style;
+}
 .card:hover { transform: translateY(-4px); box-shadow: 0 18px 45px rgba(30, 44, 36, .12); }
+.card:focus-visible { outline: 3px solid rgba(27, 104, 71, .28); outline-offset: 3px; }
 .card__image { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #ebe8df; }
-.card__image img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s; }
-.card:hover img { transform: scale(1.03); }
+.product-image { display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; }
+.product-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.card__image .product-image img { transition: transform .25s; }
+.card:hover .card__image .product-image img { transform: scale(1.025); }
 .placeholder { display: grid; place-items: center; width: 100%; height: 100%; min-height: 220px; color: #7e837f; background: #ebe8df; }
 .status { position: absolute; top: 12px; left: 12px; padding: 5px 9px; border-radius: 99px; background: rgba(20, 43, 33, .88); color: white; font-size: 12px; }
 .card__body { padding: 18px; }
@@ -58,10 +72,11 @@ select { padding: 10px 34px 10px 12px; border: 1px solid #d6d2c8; border-radius:
 .message.error { color: #a03a32; }
 
 .modal-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: rgba(7, 19, 13, .68); }
-.modal { position: relative; display: grid; grid-template-columns: 1.15fr 1fr; width: min(980px, 100%); max-height: 90vh; overflow: auto; background: #fff; border-radius: 20px; }
+.modal { position: relative; display: grid; grid-template-columns: 1.15fr 1fr; width: min(980px, 100%); max-height: 90vh; overflow: auto; overscroll-behavior: contain; background: #fff; border-radius: 20px; }
 .close { position: absolute; top: 14px; right: 14px; z-index: 2; display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); cursor: pointer; }
-.modal__gallery { display: grid; gap: 8px; padding: 12px; background: #edeae2; }
-.modal__gallery img { width: 100%; max-height: 520px; object-fit: contain; border-radius: 12px; background: white; }
+.modal__gallery { display: grid; align-content: start; gap: 8px; padding: 12px; background: #edeae2; }
+.modal__gallery .product-image { min-height: 280px; border-radius: 12px; background: white; }
+.modal__gallery .product-image img { width: 100%; max-height: 520px; object-fit: contain; border-radius: 12px; background: white; }
 .modal__body { padding: 44px 34px 34px; }
 .modal__body h2 { margin: 0; font-size: 30px; }
 .modal__body p { line-height: 1.75; }
@@ -81,6 +96,12 @@ select { padding: 10px 34px 10px 12px; border: 1px solid #d6d2c8; border-radius:
   .filters svg { display: none; }
   .filters select:last-child { grid-column: 1 / -1; }
   .grid { grid-template-columns: 1fr; }
+  .card:hover { transform: none; box-shadow: none; }
   .modal-backdrop { padding: 0; }
   .modal { width: 100%; max-height: 100vh; min-height: 100vh; border-radius: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card__image .product-image img { transition: none; }
 }
