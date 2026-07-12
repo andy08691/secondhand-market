@@ -201,6 +201,10 @@ function App() {
               <Gift size={18} aria-hidden="true" />
               <span>購買任何商品，都可以再挑選一件免費商品帶走（數量有限）</span>
             </div>
+            <div className="pickup-note">
+              <CalendarDays size={18} aria-hidden="true" />
+              <span>可用日期為暫定，實際情況請私訊我確認</span>
+            </div>
           </div>
           <div className="stats"><strong>{products.length}</strong><span>件商品</span></div>
         </div>
