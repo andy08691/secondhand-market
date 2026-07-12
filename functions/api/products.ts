@@ -26,6 +26,11 @@ const selectValue = (property?: NotionProperty): string => property?.select?.nam
 const numberValue = (property?: NotionProperty): number | undefined =>
   typeof property?.number === 'number' ? property.number : undefined
 
+const dateValue = (property?: NotionProperty): string | undefined => {
+  const start = property?.date?.start
+  return typeof start === 'string' ? start.slice(0, 10) : undefined
+}
+
 const fileUrls = (property?: NotionProperty): string[] =>
   (property?.files ?? [])
     .map((item: any) => item?.file?.url ?? item?.external?.url)
@@ -49,7 +54,8 @@ const toProduct = (page: NotionPage) => {
     status: selectValue(properties['出售狀態']) || '待上架',
     quantity: numberValue(properties['數量']) ?? 1,
     photos: [...primary, ...additional],
-    listedAt: properties['上架日期']?.date?.start ?? page.created_time
+    listedAt: properties['上架日期']?.date?.start ?? page.created_time,
+    availableDate: dateValue(properties['Available Date'])
   }
 }
 
