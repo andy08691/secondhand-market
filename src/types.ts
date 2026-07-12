@@ -12,4 +12,5 @@ export type Product = {
   quantity: number
   photos: string[]
   listedAt?: string
+  availableDate?: string
 }
