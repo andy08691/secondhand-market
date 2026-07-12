@@ -1,12 +1,45 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { CalendarDays, MapPin, Search, SlidersHorizontal, X } from 'lucide-react'
 import ProductImage from './components/ProductImage'
 import type { Product } from './types'
 
-const PRODUCT_CACHE_KEY = 'secondhand-market-products-v2'
+const PRODUCT_CACHE_KEY = 'secondhand-market-products-v3'
 const PRODUCT_CACHE_TTL_MS = 5 * 60 * 1000
 
 const priceLabel = (value: number) => value === 0 ? '免費' : `$${value}`
+
+const getPittsburghToday = () => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(new Date())
+
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  return `${values.year}-${values.month}-${values.day}`
+}
+
+const addDaysToIsoDate = (isoDate: string, days: number) => {
+  const date = new Date(`${isoDate}T00:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + days)
+  return date.toISOString().slice(0, 10)
+}
+
+const formatDate = (isoDate: string) => new Intl.DateTimeFormat('zh-TW', {
+  timeZone: 'UTC',
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric'
+}).format(new Date(`${isoDate}T00:00:00Z`))
+
+const availableDateLabel = (isoDate?: string) => {
+  if (!isoDate) return '可取日期待確認'
+  const today = getPittsburghToday()
+  return isoDate <= today
+    ? `現在可取（${formatDate(isoDate)} 起）`
+    : `${formatDate(isoDate)} 起可取`
+}
 
 type ProductCache = {
   expiresAt: number
@@ -50,6 +83,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('全部')
   const [priceRange, setPriceRange] = useState('全部')
+  const [availableDateFilter, setAvailableDateFilter] = useState('all')
   const [sort, setSort] = useState('newest')
   const [selected, setSelected] = useState<Product | null>(null)
 
@@ -111,11 +145,24 @@ function App() {
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()
+    const today = getPittsburghToday()
+    const sevenDaysLater = addDaysToIsoDate(today, 7)
+
     const matchesPrice = (price: number) => {
       if (priceRange === 'free') return price === 0
       if (priceRange === '1-10') return price >= 1 && price <= 10
       if (priceRange === '11-50') return price >= 11 && price <= 50
       if (priceRange === '51+') return price >= 51
+      return true
+    }
+
+    const matchesAvailableDate = (availableDate?: string) => {
+      if (availableDateFilter === 'available-now') return Boolean(availableDate && availableDate <= today)
+      if (availableDateFilter === 'within-7-days') {
+        return Boolean(availableDate && availableDate > today && availableDate <= sevenDaysLater)
+      }
+      if (availableDateFilter === 'later') return Boolean(availableDate && availableDate > sevenDaysLater)
+      if (availableDateFilter === 'unset') return !availableDate
       return true
     }
 
@@ -129,13 +176,14 @@ function App() {
         return (!normalized || text.includes(normalized))
           && (category === '全部' || product.category === category)
           && matchesPrice(product.salePrice)
+          && matchesAvailableDate(product.availableDate)
       })
       .sort((a, b) => {
         if (sort === 'price-asc') return a.salePrice - b.salePrice
         if (sort === 'price-desc') return b.salePrice - a.salePrice
         return (b.listedAt ?? '').localeCompare(a.listedAt ?? '')
       })
-  }, [products, query, category, priceRange, sort])
+  }, [products, query, category, priceRange, availableDateFilter, sort])
 
   return (
     <main>
@@ -143,7 +191,11 @@ function App() {
         <div className="hero__content">
           <p className="eyebrow">SECONDHAND MARKET</p>
           <h1>二手物品出售</h1>
-          <p>所有商品皆為自用二手物品。可用關鍵字、分類與價格快速找到需要的項目。</p>
+          <p>所有商品皆為自用二手物品。可用關鍵字、分類、價格與可取日期快速找到需要的項目。</p>
+          <div className="pickup-note">
+            <MapPin size={18} aria-hidden="true" />
+            <span>支援自取，或可約在 Pittsburgh Shadyside 附近面交</span>
+          </div>
           <div className="stats"><strong>{products.length}</strong><span>件商品</span></div>
         </div>
       </header>
@@ -155,17 +207,28 @@ function App() {
         </label>
         <div className="filters">
           <SlidersHorizontal size={18} />
-          <select value={category} onChange={event => setCategory(event.target.value)}>
+          <select aria-label="分類" value={category} onChange={event => setCategory(event.target.value)}>
             {categories.map(item => <option key={item}>{item}</option>)}
           </select>
-          <select value={priceRange} onChange={event => setPriceRange(event.target.value)}>
+          <select aria-label="價格" value={priceRange} onChange={event => setPriceRange(event.target.value)}>
             <option value="全部">所有價格</option>
             <option value="free">免費</option>
             <option value="1-10">$1–10</option>
             <option value="11-50">$11–50</option>
             <option value="51+">$51+</option>
           </select>
-          <select value={sort} onChange={event => setSort(event.target.value)}>
+          <select
+            aria-label="可取日期"
+            value={availableDateFilter}
+            onChange={event => setAvailableDateFilter(event.target.value)}
+          >
+            <option value="all">所有可取日期</option>
+            <option value="available-now">現在可取</option>
+            <option value="within-7-days">未來 7 天內</option>
+            <option value="later">7 天後</option>
+            <option value="unset">日期未設定</option>
+          </select>
+          <select aria-label="排序" value={sort} onChange={event => setSort(event.target.value)}>
             <option value="newest">最新上架</option>
             <option value="price-asc">價格低到高</option>
             <option value="price-desc">價格高到低</option>
@@ -194,9 +257,16 @@ function App() {
                 <span className="status">{product.status}</span>
               </div>
               <div className="card__body">
-                <div className="card__meta"><span>{product.category}</span><span>{product.condition}</span></div>
+                <div className="card__meta">
+                  <span>{product.category}</span>
+                  {product.condition && <span>{product.condition}</span>}
+                </div>
                 <h2>{product.name}</h2>
                 {product.brandModel && <p className="muted">{product.brandModel}</p>}
+                <p className={`available-date${product.availableDate ? '' : ' is-unset'}`}>
+                  <CalendarDays size={16} aria-hidden="true" />
+                  <span>{availableDateLabel(product.availableDate)}</span>
+                </p>
                 <div className="price-row">
                   <strong>{priceLabel(product.salePrice)}</strong>
                   {product.originalPrice != null && <span>原價 ${product.originalPrice}</span>}
@@ -225,6 +295,10 @@ function App() {
                 <strong>{priceLabel(selected.salePrice)}</strong>
                 {selected.originalPrice != null && <span>原價 ${selected.originalPrice}</span>}
               </div>
+              <p className={`available-date modal-date${selected.availableDate ? '' : ' is-unset'}`}>
+                <CalendarDays size={17} aria-hidden="true" />
+                <span><b>可取日期：</b>{availableDateLabel(selected.availableDate)}</span>
+              </p>
               {selected.brandModel && <p><b>品牌／型號：</b>{selected.brandModel}</p>}
               {selected.condition && <p><b>物品狀況：</b>{selected.condition}</p>}
               {selected.defect && <p><b>瑕疵／缺件：</b>{selected.defect}</p>}
