@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Gift, MapPin, Search, SlidersHorizontal, X } from 'lucide-react'
+import { CalendarDays, Gift, MapPin, MousePointerClick, Search, SlidersHorizontal, X } from 'lucide-react'
 import ProductImage from './components/ProductImage'
 import type { Product } from './types'
 
@@ -204,6 +204,10 @@ function App() {
             <div className="pickup-note">
               <CalendarDays size={18} aria-hidden="true" />
               <span>可用日期為暫定，實際情況請私訊我確認</span>
+            </div>
+            <div className="pickup-note">
+              <MousePointerClick size={18} aria-hidden="true" />
+              <span>點擊商品卡片可查看詳細內容與更多照片</span>
             </div>
           </div>
           <div className="stats"><strong>{products.length}</strong><span>件商品</span></div>
