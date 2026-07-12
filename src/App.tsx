@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, MapPin, Search, SlidersHorizontal, X } from 'lucide-react'
+import { CalendarDays, Gift, MapPin, Search, SlidersHorizontal, X } from 'lucide-react'
 import ProductImage from './components/ProductImage'
 import type { Product } from './types'
 
@@ -192,9 +192,15 @@ function App() {
           <p className="eyebrow">SECONDHAND MARKET</p>
           <h1>二手物品出售</h1>
           <p>所有商品皆為自用二手物品。可用關鍵字、分類、價格與可取日期快速找到需要的項目。</p>
-          <div className="pickup-note">
-            <MapPin size={18} aria-hidden="true" />
-            <span>支援自取，或可約在 Pittsburgh Shadyside 附近面交</span>
+          <div className="hero-notes">
+            <div className="pickup-note">
+              <MapPin size={18} aria-hidden="true" />
+              <span>支援自取，或可約在 Pittsburgh Shadyside 附近面交</span>
+            </div>
+            <div className="pickup-note gift-note">
+              <Gift size={18} aria-hidden="true" />
+              <span>購買任何商品，都可以再挑選一件免費商品帶走（數量有限）</span>
+            </div>
           </div>
           <div className="stats"><strong>{products.length}</strong><span>件商品</span></div>
         </div>
