@@ -195,7 +195,11 @@ function App() {
           <div className="hero-notes">
             <div className="pickup-note">
               <MapPin size={18} aria-hidden="true" />
-              <span>支援自取，或可約在 Pittsburgh Shadyside 附近面交</span>
+              <span>8/9 前支援自取，或可約在 Pittsburgh Shadyside 附近面交</span>
+            </div>
+            <div className="pickup-note">
+              <MapPin size={18} aria-hidden="true" />
+              <span>8/9 後僅限上門取貨：100 Bryn Mawr Ct, Pittsburgh, PA 15221</span>
             </div>
             <div className="pickup-note gift-note">
               <Gift size={18} aria-hidden="true" />
