@@ -16,6 +16,11 @@ type NotionPage = {
 }
 
 const NOTION_VERSION = '2025-09-03'
+const STATUS_ORDER: Record<string, number> = {
+  出售中: 0,
+  保留中: 1,
+  已售出: 2
+}
 
 const textValue = (property?: NotionProperty): string => {
   const values = property?.title ?? property?.rich_text ?? []
@@ -105,8 +110,12 @@ export const onRequestGet = async ({ env }: PagesContext): Promise<Response> => 
 
     const products = pages
       .map(toProduct)
-      .filter(product => !['已售出', '下架'].includes(product.status))
-      .sort((a, b) => (b.listedAt ?? '').localeCompare(a.listedAt ?? ''))
+      .filter(product => product.status !== '下架')
+      .sort((a, b) => {
+        const statusDifference = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99)
+        if (statusDifference !== 0) return statusDifference
+        return (b.listedAt ?? '').localeCompare(a.listedAt ?? '')
+      })
 
     return Response.json(
       { products, updatedAt: new Date().toISOString() },
