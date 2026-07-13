@@ -3,10 +3,15 @@ import { CalendarDays, Gift, MapPin, MousePointerClick, Search, SlidersHorizonta
 import ProductImage from './components/ProductImage'
 import type { Product } from './types'
 
-const PRODUCT_CACHE_KEY = 'secondhand-market-products-v3'
+const PRODUCT_CACHE_KEY = 'secondhand-market-products-v4'
 const PRODUCT_CACHE_TTL_MS = 5 * 60 * 1000
 
 const priceLabel = (value: number) => value === 0 ? '免費' : `$${value}`
+const STATUS_ORDER: Record<string, number> = {
+  出售中: 0,
+  保留中: 1,
+  已售出: 2
+}
 
 const getPittsburghToday = () => {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -179,6 +184,8 @@ function App() {
           && matchesAvailableDate(product.availableDate)
       })
       .sort((a, b) => {
+        const statusDifference = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99)
+        if (statusDifference !== 0) return statusDifference
         if (sort === 'price-asc') return a.salePrice - b.salePrice
         if (sort === 'price-desc') return b.salePrice - a.salePrice
         return (b.listedAt ?? '').localeCompare(a.listedAt ?? '')
